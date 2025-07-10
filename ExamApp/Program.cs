@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using AutoMapper;
+using ExamApp.Data;
 using ExamApp.Helpers;
 using ExamApp.Models;
 using ExamApp.Repositories.Implementations;
@@ -55,6 +56,8 @@ namespace ExamApp
             // Repositories & Services
             builder.Services.AddScoped<AuthService>();
             builder.Services.AddScoped<IExamRepository, ExamRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 
             // CORS
             builder.Services.AddCors(options =>
@@ -68,6 +71,7 @@ namespace ExamApp
             });
 
             var app = builder.Build();
+            DbSeeder.Seed(app);
 
             // Middleware
             app.UseCors(corsPolicyName);
