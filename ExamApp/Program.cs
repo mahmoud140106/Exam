@@ -6,6 +6,7 @@ using ExamApp.Models;
 using ExamApp.Repositories.Implementations;
 using ExamApp.Repositories.Interface;
 using ExamApp.Services;
+using ExamApp.UnitOfWork;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -20,14 +21,18 @@ namespace ExamApp
             var corsPolicyName = "MyCorsPolicy";
 
             // Controllers
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+            }); ;
 
             // Swagger (OpenAPI)
             builder.Services.AddOpenApi();
 
             // Database
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseLazyLoadingProxies()
+                options
+                        //.UseLazyLoadingProxies()
                        .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             // Authentication (JWT)
@@ -58,6 +63,7 @@ namespace ExamApp
             builder.Services.AddScoped<IExamRepository, ExamRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+            builder.Services.AddScoped<IUnitOfWork,UnitOfWork.UnitOfWork>();
 
             // CORS
             builder.Services.AddCors(options =>
