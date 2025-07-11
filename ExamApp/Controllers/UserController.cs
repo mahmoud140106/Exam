@@ -2,23 +2,22 @@
 using ExamApp.DTOs.User;
 using ExamApp.Helpers;
 using ExamApp.Models;
-using ExamApp.Repositories.Interface;
-using ExamApp.Services;
+using ExamApp.UnitOfWork;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExamApp.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")] 
+    [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
-        private readonly IUserRepository _userRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IConfiguration _config;
 
-        public UserController(IUserRepository userRepository, IMapper mapper, IConfiguration config)
+        public UserController(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration config)
         {
-            _userRepository = userRepository;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
             _config = config;
         }
@@ -26,25 +25,27 @@ namespace ExamApp.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(UserRegisterDto dto)
         {
-            if (await _userRepository.IsEmailExistsAsync(dto.Email))
+            if (await _unitOfWork.UserRepo.IsEmailExistsAsync(dto.Email))
                 return BadRequest("Email already exists.");
 
-            if (await _userRepository.IsUsernameExistsAsync(dto.Username))
+            if (await _unitOfWork.UserRepo.IsUsernameExistsAsync(dto.Username))
                 return BadRequest("Username already exists.");
 
             var user = _mapper.Map<User>(dto);
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
-            user.Role = "Student"; // Default role
+            user.Role = "Student";
 
-            var createdUser = await _userRepository.RegisterAsync(user);
-            var response = _mapper.Map<UserResponseDto>(createdUser);
+            await _unitOfWork.UserRepo.RegisterAsync(user);
+            await _unitOfWork.SaveChangesAsync();
+
+            var response = _mapper.Map<UserResponseDto>(user);
             return Ok(response);
         }
 
         [HttpPost("login")]
         public async Task<IActionResult> Login(UserLoginDto dto)
         {
-            var user = await _userRepository.GetByEmailAsync(dto.Email);
+            var user = await _unitOfWork.UserRepo.GetByEmailAsync(dto.Email);
             if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
                 return Unauthorized("Invalid credentials.");
 

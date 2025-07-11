@@ -1,28 +1,27 @@
 ﻿using ExamApp.Helpers;
-using ExamApp.Models;
-using Microsoft.EntityFrameworkCore;
+using ExamApp.Services.Interface;
+using ExamApp.UnitOfWork;
 
 namespace ExamApp.Services
 {
-    public class AuthService
+    public class AuthService : IAuthService
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IConfiguration _config;
 
-        public AuthService(ApplicationDbContext context, IConfiguration config)
+        public AuthService(IUnitOfWork unitOfWork, IConfiguration config)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
             _config = config;
         }
 
-        public async Task<string> LoginAsync(string email, string password)
+        public async Task<string?> LoginAsync(string email, string password)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            var user = await _unitOfWork.UserRepo.GetByEmailAsync(email);
             if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
-                return null!;
+                return null;
 
             return JwtHelper.GenerateToken(user, _config);
         }
     }
-
 }
