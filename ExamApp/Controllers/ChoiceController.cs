@@ -6,6 +6,7 @@ using ExamApp.Repositories.Interface;
 using ExamApp.UnitOfWork;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ExamApp.Controllers
 {
@@ -54,7 +55,81 @@ namespace ExamApp.Controllers
             await Uow.ChoiceRepo.AddRangeAsync(Mapper.Map<List<Choice>>(choiceDtos));
             var succeeded = await Uow.SaveChangesAsync() >0;
             if (succeeded) return CreatedAtAction(nameof(GetByQuestionId), new {id=questionId},choiceDtos);
-            return Ok();
+            return BadRequest();
         }
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateAsync(ChoiceDto choiceDto, int id)
+        {
+            
+            if(choiceDto.Id != id) return BadRequest();
+
+            var exists= await Uow.ChoiceRepo.GetByIdAsync(id) !=null;
+            if(!exists) return NotFound();
+
+            var choice = Mapper.Map<Choice>(choiceDto);
+            await Uow.ChoiceRepo.UpdateAsync(choice);
+
+            try
+            {
+                await Uow.SaveChangesAsync();
+                return NoContent();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return Conflict("A concurrency conflict occurred.");
+            }
+        }
+        [HttpPut]
+        public async Task<IActionResult> UpdateRange(List<ChoiceDto> choiceDtos)
+        {
+            
+            if(choiceDtos ==null || choiceDtos.Count ==0) return BadRequest();
+
+
+            var choices = Mapper.Map<List<Choice>>(choiceDtos);
+            Uow.ChoiceRepo.UpdateRange(choices);
+
+            try
+            {
+                var noRowsUpdated = await Uow.SaveChangesAsync();
+                if (noRowsUpdated > 0) return NoContent();
+                    
+                return NotFound();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return Conflict("A concurrency conflict occurred.");
+            }
+        }
+
+        [HttpDelete("q/{questionId}")]
+        public async Task<IActionResult> DeleteAllByQuestionIdAsync(int questionId)
+        {
+            var noRowsDeleted = await Uow.ChoiceRepo.DeleteAllByQuestionIdAsync(questionId);
+            if (noRowsDeleted > 0)
+                return NoContent();
+            return NotFound();
+        }
+        
+        [HttpDelete("{id}")]    
+        public async Task<IActionResult> DeleteByIdAsync(int id)
+        {
+            var choice = await Uow.ChoiceRepo.GetByIdAsync(id);
+            if (choice == null) return NotFound();
+            Uow.ChoiceRepo.Delete(choice);
+
+            try
+            {
+                await Uow.SaveChangesAsync();
+                return NoContent();
+            }
+            catch
+            {
+                return Conflict();
+            }
+        }
+
+
     }
+
 }
