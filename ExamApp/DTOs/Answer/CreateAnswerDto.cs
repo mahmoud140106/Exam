@@ -1,8 +1,7 @@
 ﻿namespace ExamApp.DTOs.Answer
 {
-    public class AnswerDto
+    public class CreateAnswerDto
     {
-        public int Id { get; set; }
         public int? ResultId { get; set; }
         public int? QuestionId { get; set; }
         public int? ChoiceId { get; set; }

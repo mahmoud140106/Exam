@@ -6,6 +6,7 @@ using ExamApp.Models;
 using ExamApp.Repositories.Implementations;
 using ExamApp.Repositories.Interface;
 using ExamApp.Services;
+using ExamApp.Services.Interface;
 using ExamApp.UnitOfWork;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -59,10 +60,12 @@ namespace ExamApp
             builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
             // Repositories & Services
-            builder.Services.AddScoped<AuthService>();
-            builder.Services.AddScoped<IExamRepository, ExamRepository>();
-            builder.Services.AddScoped<IUserRepository, UserRepository>();
-            builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+            //builder.Services.AddScoped<AuthService>();
+            //builder.Services.AddScoped<IExamRepository, ExamRepository>();
+            //builder.Services.AddScoped<IUserRepository, UserRepository>();
+            //builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+
+            builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IUnitOfWork,UnitOfWork.UnitOfWork>();
 
             // CORS

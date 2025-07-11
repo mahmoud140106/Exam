@@ -1,8 +1,7 @@
 ﻿namespace ExamApp.DTOs.Result
 {
-    public class ResultDto
+    public class CreateResultDto
     {
-        public int Id { get; set; }
         public int? StudentId { get; set; }
         public int? ExamId { get; set; }
         public int AttemptNumber { get; set; }

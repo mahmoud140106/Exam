@@ -12,6 +12,9 @@ namespace ExamApp.UnitOfWork
         private IQuestionRepository _questions;
         private IUserRepository _users;
         private IChoiceRepository _choices;
+        private IAnswerRepository _answers;
+        private IResultRepository _results;
+
 
         public UnitOfWork(ApplicationDbContext context)
         {
@@ -24,8 +27,13 @@ namespace ExamApp.UnitOfWork
         public IQuestionRepository QuestionRepo =>
             _questions ??= new QuestionRepository(_context);
 
+        public IAnswerRepository AnswerRepo =>
+          _answers ??= new AnswerRepository(_context);
         public IUserRepository UserRepo=>
             _users ??= new UserRepository(_context);
+
+        public IResultRepository ResultRepo =>
+            _results ??= new ResultRepository(_context);
 
         public IChoiceRepository ChoiceRepo=>
             _choices ??= new ChoiceRepository(_context);
