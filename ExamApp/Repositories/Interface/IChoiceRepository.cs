@@ -6,7 +6,7 @@ namespace ExamApp.Repositories.Interface
     {
         bool UpdateRange(List<Choice> choices);
         Task<List<Choice>> GetByQuestionIdAsync(int questionId);
-        Task<bool> AddRangeAsync(params List<Choice> choices);
+        Task<bool> AddRangeAsync(List<Choice> choices);
         Task<int> DeleteAllByQuestionIdAsync(int questionId);
         bool Delete(Choice choice);
     }

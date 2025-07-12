@@ -71,18 +71,20 @@ namespace ExamApp.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAsync(ChoiceDto choiceDto, int id)
         {
-            if (choiceDto.Id != id) return BadRequest();
+            if (choiceDto.Id != id)
+                return Fail("Choice ID does not match route parameter");
 
-            var exists = await Uow.ChoiceRepo.GetByIdAsync(id) != null;
-            if (!exists) return NotFound();
+            var existingChoice = await Uow.ChoiceRepo.GetByIdAsync(id);
+            if (existingChoice == null)
+                return NotFoundResponse("Choice not found");
 
-            var choice = Mapper.Map<Choice>(choiceDto);
-            await Uow.ChoiceRepo.UpdateAsync(choice);
+            existingChoice.Text = choiceDto.Text;
+            existingChoice.IsCorrect = choiceDto.IsCorrect;
+            existingChoice.QuestionId = choiceDto.QuestionId;
 
             try
             {
                 await Uow.SaveChangesAsync();
-                //return NoContent();
                 return Success(choiceDto, "Choice updated successfully");
             }
             catch (DbUpdateConcurrencyException)

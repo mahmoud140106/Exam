@@ -14,7 +14,7 @@ namespace ExamApp.Repositories.Implementations
 
         public ApplicationDbContext Db { get; }
 
-        public async Task<bool> AddRangeAsync(params List<Choice> choices)
+        public async Task<bool> AddRangeAsync(List<Choice> choices)
         {
            await Db.Choices.AddRangeAsync(choices);
            return true;

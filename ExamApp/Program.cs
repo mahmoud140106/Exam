@@ -29,7 +29,9 @@ namespace ExamApp
             }); ;
 
             // Swagger (OpenAPI)
-            builder.Services.AddOpenApi();
+            //builder.Services.AddOpenApi();
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
 
             // Database
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -89,8 +91,16 @@ namespace ExamApp
 
             if (app.Environment.IsDevelopment())
             {
-                app.MapOpenApi();
-                app.UseSwaggerUI(op => op.SwaggerEndpoint("/openapi/v1.json", "v1"));
+                //app.MapOpenApi();
+                //app.UseSwaggerUI(op => op.SwaggerEndpoint("/openapi/v1.json", "v1"));
+                app.UseSwagger();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+                    c.RoutePrefix = "swagger";
+                });
+
+
             }
 
             app.UseHttpsRedirection();
