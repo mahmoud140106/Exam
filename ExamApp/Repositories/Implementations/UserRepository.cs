@@ -33,11 +33,10 @@ namespace ExamApp.Repositories.Implementations
             return await _context.Users.AnyAsync(u => u.Username == username);
         }
 
-        public async Task<User> RegisterAsync(User user)
+        public Task<User> RegisterAsync(User user)
         {
             _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-            return user;
+            return Task.FromResult(user);
         }
     }
 }

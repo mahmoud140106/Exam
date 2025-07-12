@@ -23,17 +23,16 @@ namespace ExamApp.Repositories.Implementations
             return await _context.Questions.FindAsync(id);
         }
 
-        public async Task<Question> CreateAsync(Question question)
+        public Task<Question> CreateAsync(Question question)
         {
             _context.Questions.Add(question);
-            await _context.SaveChangesAsync();
-            return question;
+            return Task.FromResult(question);
         }
 
-        public async Task<bool> UpdateAsync(Question question)
+        public Task<bool> UpdateAsync(Question question)
         {
             _context.Questions.Update(question);
-            return await _context.SaveChangesAsync() > 0;
+            return Task.FromResult(true);
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -41,7 +40,7 @@ namespace ExamApp.Repositories.Implementations
             var question = await GetByIdAsync(id);
             if (question == null) return false;
             _context.Questions.Remove(question);
-            return await _context.SaveChangesAsync() > 0;
+            return true; 
         }
 
         public async Task<List<Question>> GetByExamIdAsync(int examId)
