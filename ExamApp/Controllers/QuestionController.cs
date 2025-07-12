@@ -9,7 +9,7 @@ namespace ExamApp.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class QuestionController : ControllerBase
+    public class QuestionController : BaseApiController
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -24,22 +24,27 @@ namespace ExamApp.Controllers
         public async Task<IActionResult> GetAll()
         {
             var questions = await _unitOfWork.QuestionRepo.GetAllAsync();
-            return Ok(_mapper.Map<List<QuestionDto>>(questions));
+            return Success(_mapper.Map<List<QuestionDto>>(questions));
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
             var question = await _unitOfWork.QuestionRepo.GetByIdAsync(id);
-            if (question == null) return NotFound();
-            return Ok(_mapper.Map<QuestionDto>(question));
+            if (question == null)
+                return NotFoundResponse("Question not found");
+
+            return Success(_mapper.Map<QuestionDto>(question));
         }
 
         [HttpGet("by-exam/{examId}")]
         public async Task<IActionResult> GetByExamId(int examId)
         {
             var questions = await _unitOfWork.QuestionRepo.GetByExamIdAsync(examId);
-            return Ok(_mapper.Map<List<QuestionDto>>(questions));
+            if (questions == null || questions.Count == 0)
+                return NotFoundResponse("No questions found for this exam");
+
+            return Success(_mapper.Map<List<QuestionDto>>(questions));
         }
 
         [HttpPost]
@@ -50,7 +55,7 @@ namespace ExamApp.Controllers
             await _unitOfWork.QuestionRepo.CreateAsync(question);
             await _unitOfWork.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetById), new { id = question.Id }, _mapper.Map<QuestionDto>(question));
+            return Success(_mapper.Map<QuestionDto>(question), "Question created successfully");
         }
 
         [HttpPut("{id}")]
@@ -58,14 +63,16 @@ namespace ExamApp.Controllers
         public async Task<IActionResult> Update(int id, CreateQuestionDto dto)
         {
             var existing = await _unitOfWork.QuestionRepo.GetByIdAsync(id);
-            if (existing == null) return NotFound();
+            if (existing == null)
+                return NotFoundResponse("Question not found");
 
             _mapper.Map(dto, existing);
             var success = await _unitOfWork.QuestionRepo.UpdateAsync(existing);
-            if (!success) return StatusCode(500);
+            if (!success)
+                return Fail("Failed to update question");
 
             await _unitOfWork.SaveChangesAsync();
-            return NoContent();
+            return Success("Question updated successfully");
         }
 
         [HttpDelete("{id}")]
@@ -73,10 +80,11 @@ namespace ExamApp.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var deleted = await _unitOfWork.QuestionRepo.DeleteAsync(id);
-            if (!deleted) return NotFound();
+            if (!deleted)
+                return NotFoundResponse("Question not found or already deleted");
 
             await _unitOfWork.SaveChangesAsync();
-            return NoContent();
+            return Success("Question deleted successfully");
         }
     }
 }

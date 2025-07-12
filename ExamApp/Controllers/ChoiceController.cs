@@ -12,7 +12,7 @@ namespace ExamApp.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ChoiceController : ControllerBase
+    public class ChoiceController : BaseApiController
     {
         public ChoiceController(IUnitOfWork _uow, IMapper _mapper)
         {
@@ -26,7 +26,8 @@ namespace ExamApp.Controllers
         public async Task<IActionResult> GetAll()
         {
             var choices = await Uow.ChoiceRepo.GetAllAsync();
-            return Ok(Mapper.Map<List<ChoiceDto>>(choices));
+            //return Ok(Mapper.Map<List<ChoiceDto>>(choices));
+            return Success(Mapper.Map<List<ChoiceDto>>(choices));
         }
 
         [HttpGet("{id}")]
@@ -35,36 +36,45 @@ namespace ExamApp.Controllers
             Console.WriteLine($"\n**************************************************\nFetching Choice with Id {id}\n**************************************************");
             var choice = await Uow.ChoiceRepo.GetByIdAsync(id);
             Console.WriteLine($"Correctly retrived {choice?.Id} {choice?.Text}");
-            if(choice == null) return NotFound();
+            if (choice == null)
+                return NotFoundResponse("Choice not found");
+            //return NotFound();
 
-            return Ok(choice);
+            //return Ok(choice);
+            return Success(Mapper.Map<ChoiceDto>(choice));
         }
 
         [HttpGet("q/{id}")]
         public async Task<IActionResult> GetByQuestionId(int id)
         {
             var choices = await Uow.ChoiceRepo.GetByQuestionIdAsync(id);
-            if(choices.Count == 0) return NotFound();
+            if (choices.Count == 0)
+                return NotFoundResponse("No choices found for this question");
+            //return NotFound();
 
-            return Ok(choices);
+            return Success(Mapper.Map<List<ChoiceDto>>(choices));
+            //return Ok(choices);
         }
 
         [HttpPost("{questionId}")]
-        public async Task<IActionResult> Create(int questionId,List<ChoiceDto> choiceDtos)
+        public async Task<IActionResult> Create(int questionId, List<CreateChoiceDto> choiceDtos)
         {
             await Uow.ChoiceRepo.AddRangeAsync(Mapper.Map<List<Choice>>(choiceDtos));
-            var succeeded = await Uow.SaveChangesAsync() >0;
-            if (succeeded) return CreatedAtAction(nameof(GetByQuestionId), new {id=questionId},choiceDtos);
-            return BadRequest();
+            var succeeded = await Uow.SaveChangesAsync() > 0;
+            if (succeeded)
+                return Success(choiceDtos, "Choices created successfully");
+            //return CreatedAtAction(nameof(GetByQuestionId), new {id=questionId},choiceDtos);
+            return Fail("Failed to create choices");
+            //return Ok();
         }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateAsync(ChoiceDto choiceDto, int id)
         {
-            
-            if(choiceDto.Id != id) return BadRequest();
+            if (choiceDto.Id != id) return BadRequest();
 
-            var exists= await Uow.ChoiceRepo.GetByIdAsync(id) !=null;
-            if(!exists) return NotFound();
+            var exists = await Uow.ChoiceRepo.GetByIdAsync(id) != null;
+            if (!exists) return NotFound();
 
             var choice = Mapper.Map<Choice>(choiceDto);
             await Uow.ChoiceRepo.UpdateAsync(choice);
@@ -72,19 +82,19 @@ namespace ExamApp.Controllers
             try
             {
                 await Uow.SaveChangesAsync();
-                return NoContent();
+                //return NoContent();
+                return Success(choiceDto, "Choice updated successfully");
             }
             catch (DbUpdateConcurrencyException)
             {
                 return Conflict("A concurrency conflict occurred.");
             }
         }
+
         [HttpPut]
         public async Task<IActionResult> UpdateRange(List<ChoiceDto> choiceDtos)
         {
-            
-            if(choiceDtos ==null || choiceDtos.Count ==0) return BadRequest();
-
+            if (choiceDtos == null || choiceDtos.Count == 0) return BadRequest();
 
             var choices = Mapper.Map<List<Choice>>(choiceDtos);
             Uow.ChoiceRepo.UpdateRange(choices);
@@ -92,9 +102,14 @@ namespace ExamApp.Controllers
             try
             {
                 var noRowsUpdated = await Uow.SaveChangesAsync();
-                if (noRowsUpdated > 0) return NoContent();
-                    
-                return NotFound();
+                if (noRowsUpdated > 0)
+                    return Success(choiceDtos, "Choices updated successfully");
+
+                //return NoContent();
+
+                //return NotFound();
+                return NotFoundResponse("No matching choices were found to update");
+
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -107,29 +122,33 @@ namespace ExamApp.Controllers
         {
             var noRowsDeleted = await Uow.ChoiceRepo.DeleteAllByQuestionIdAsync(questionId);
             if (noRowsDeleted > 0)
-                return NoContent();
-            return NotFound();
+                //return NoContent();
+                return Success($"Deleted {noRowsDeleted} choices", "Choices deleted successfully");
+            //return NotFound();
+            return NotFoundResponse("No choices found for this question");
         }
-        
-        [HttpDelete("{id}")]    
+
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteByIdAsync(int id)
         {
             var choice = await Uow.ChoiceRepo.GetByIdAsync(id);
-            if (choice == null) return NotFound();
+            if (choice == null)
+                return NotFoundResponse("Choice not found");
+            //return NotFound();
             Uow.ChoiceRepo.Delete(choice);
 
             try
             {
                 await Uow.SaveChangesAsync();
-                return NoContent();
+                //return NoContent();
+                return Success($"Choice with ID {id} deleted", "Choice deleted successfully");
+
             }
             catch
             {
-                return Conflict();
+                //return Conflict();
+                return Conflict("Failed to delete choice due to a conflict");
             }
         }
-
-
     }
-
 }

@@ -9,7 +9,7 @@ namespace ExamApp.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ExamController : ControllerBase
+    public class ExamController : BaseApiController
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -24,15 +24,17 @@ namespace ExamApp.Controllers
         public async Task<IActionResult> GetAll()
         {
             var exams = await _unitOfWork.ExamRepo.GetAllAsync();
-            return Ok(_mapper.Map<List<ExamDto>>(exams));
+            return Success(_mapper.Map<List<ExamDto>>(exams));
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
             var exam = await _unitOfWork.ExamRepo.GetByIdAsync(id);
-            if (exam == null) return NotFound();
-            return Ok(_mapper.Map<ExamDto>(exam));
+            if (exam == null)
+                return NotFoundResponse("Exam not found");
+
+            return Success(_mapper.Map<ExamDto>(exam));
         }
 
         [HttpPost]
@@ -46,7 +48,7 @@ namespace ExamApp.Controllers
             await _unitOfWork.ExamRepo.CreateAsync(exam);
             await _unitOfWork.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetById), new { id = exam.Id }, _mapper.Map<ExamDto>(exam));
+            return Success(_mapper.Map<ExamDto>(exam), "Exam created successfully");
         }
 
         [HttpPut("{id}")]
@@ -54,14 +56,17 @@ namespace ExamApp.Controllers
         public async Task<IActionResult> Update(int id, CreateExamDto dto)
         {
             var existing = await _unitOfWork.ExamRepo.GetByIdAsync(id);
-            if (existing == null) return NotFound();
+            if (existing == null)
+                return NotFoundResponse("Exam not found");
 
             _mapper.Map(dto, existing);
             var success = await _unitOfWork.ExamRepo.UpdateAsync(existing);
-            if (!success) return StatusCode(500);
+
+            if (!success)
+                return Fail("Failed to update exam");
 
             await _unitOfWork.SaveChangesAsync();
-            return NoContent();
+            return Success("Exam updated successfully");
         }
 
         [HttpDelete("{id}")]
@@ -69,10 +74,11 @@ namespace ExamApp.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var success = await _unitOfWork.ExamRepo.DeleteAsync(id);
-            if (!success) return NotFound();
+            if (!success)
+                return NotFoundResponse("Exam not found or already deleted");
 
             await _unitOfWork.SaveChangesAsync();
-            return NoContent();
+            return Success("Exam deleted successfully");
         }
     }
 }

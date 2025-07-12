@@ -26,6 +26,7 @@ namespace ExamApp.Helpers
             CreateMap<Question, QuestionDto>();
             
             CreateMap<Choice, ChoiceDto>().ReverseMap();
+            CreateMap<Choice,CreateAnswerDto >().ReverseMap();
 
             CreateMap<CreateAnswerDto, Answer>();
             CreateMap<Answer, AnswerDto>();
