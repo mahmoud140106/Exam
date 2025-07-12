@@ -26,15 +26,31 @@ namespace ExamApp.Repositories.Implementations
             return choice.Entity;
         }
 
-        public Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
-            var choice = Db.Choices.Find(id);
+            var choice = await Db.Choices.FindAsync(id);
             if(choice == null)
-                return Task.FromResult(false);
+                return false;
+            Db.Choices.Remove(choice);
+            return true;
+        }
+        public bool Delete(Choice choice)
+        {
+            if(choice == null)
+                return false;
            
             Db.Choices.Remove(choice);
-            return Task.FromResult(true);
+            return true;
         }
+
+        public async Task<int> DeleteAllByQuestionIdAsync(int questionId)
+        {
+            var noRowsDeleted = await Db.Choices.Where(c => c.QuestionId == questionId && c.Answers.Count == 0)
+                      .ExecuteDeleteAsync();
+            return noRowsDeleted;
+        }
+
+
 
         public async Task<List<Choice>> GetAllAsync()
         {
@@ -51,14 +67,20 @@ namespace ExamApp.Repositories.Implementations
             return await Db.Choices.Where(c=> c.QuestionId == questionId).ToListAsync();
         }
 
-        public Task<bool> UpdateAsync(Choice entity)
+        public async Task<bool> UpdateAsync(Choice entity)
         {
             var entry = Db.Entry<Choice>(entity);
 
-            if (entry == null) return new Task<bool>(()=> false);
+            if (entry == null) return false;
 
             entry.State = EntityState.Modified;
-            return new Task<bool>(() => true);
+            return true;
+        }
+        public bool UpdateRange(List<Choice> choices)
+        {
+            if(choices == null || choices.Count==0) return false;
+            Db.Choices.UpdateRange(choices);
+            return true;
         }
     }
 }
