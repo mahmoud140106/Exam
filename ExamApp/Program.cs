@@ -60,7 +60,7 @@ namespace ExamApp
             builder.Services.AddAuthorization();
 
             // AutoMapper
-            builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
+            builder.Services.AddAutoMapper(typeof(MappingProfile)); // Update this line
 
             // Repositories & Services
             //builder.Services.AddScoped<AuthService>();
