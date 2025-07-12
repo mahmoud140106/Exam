@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace ExamApp
-{
+{  
     public class Program
     {
         public static void Main(string[] args)
