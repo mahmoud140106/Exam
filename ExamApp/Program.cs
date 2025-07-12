@@ -2,6 +2,7 @@
 using AutoMapper;
 using ExamApp.Data;
 using ExamApp.Helpers;
+using ExamApp.Middleware;
 using ExamApp.Models;
 using ExamApp.Repositories.Implementations;
 using ExamApp.Repositories.Interface;
@@ -81,6 +82,7 @@ namespace ExamApp
 
             var app = builder.Build();
             DbSeeder.Seed(app);
+            app.UseMiddleware<ExceptionMiddleware>();
 
             // Middleware
             app.UseCors(corsPolicyName);

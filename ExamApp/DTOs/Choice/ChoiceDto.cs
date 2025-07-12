@@ -7,7 +7,7 @@ namespace ExamApp.DTOs.Choice
 {
     public class ChoiceDto
     {
-            public int Id { get; set; }
+            //public int Id { get; set; }
 
             public int? QuestionId { get; set; }
 

@@ -11,7 +11,7 @@ namespace ExamApp.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ChoiceController : ControllerBase
+    public class ChoiceController : BaseApiController
     {
         public ChoiceController(IUnitOfWork _uow, IMapper _mapper)
         {
@@ -25,7 +25,8 @@ namespace ExamApp.Controllers
         public async Task<IActionResult> GetAll()
         {
             var choices = await Uow.ChoiceRepo.GetAllAsync();
-            return Ok(Mapper.Map<List<ChoiceDto>>(choices));
+            //return Ok(Mapper.Map<List<ChoiceDto>>(choices));
+            return Success(Mapper.Map<List<ChoiceDto>>(choices));
         }
 
         [HttpGet("{id}")]
@@ -34,18 +35,25 @@ namespace ExamApp.Controllers
             Console.WriteLine($"\n**************************************************\nFetching Choice with Id {id}\n**************************************************");
             var choice = await Uow.ChoiceRepo.GetByIdAsync(id);
             Console.WriteLine($"Correctly retrived {choice?.Id} {choice?.Text}");
-            if(choice == null) return NotFound();
+            if(choice == null)
+                return NotFoundResponse("Choice not found");
+            //return NotFound();
 
-            return Ok(choice);
+            //return Ok(choice);
+            return Success(Mapper.Map<ChoiceDto>(choice));
+
         }
 
         [HttpGet("q/{id}")]
         public async Task<IActionResult> GetByQuestionId(int id)
         {
             var choices = await Uow.ChoiceRepo.GetByQuestionIdAsync(id);
-            if(choices.Count == 0) return NotFound();
+            if(choices.Count == 0)
+                return NotFoundResponse("No choices found for this question");
+            //return NotFound();
 
-            return Ok(choices);
+            return Success(Mapper.Map<List<ChoiceDto>>(choices));
+            //return Ok(choices);
         }
 
         [HttpPost("{questionId}")]
@@ -53,8 +61,11 @@ namespace ExamApp.Controllers
         {
             await Uow.ChoiceRepo.AddRangeAsync(Mapper.Map<List<Choice>>(choiceDtos));
             var succeeded = await Uow.SaveChangesAsync() >0;
-            if (succeeded) return CreatedAtAction(nameof(GetByQuestionId), new {id=questionId},choiceDtos);
-            return Ok();
+            if (succeeded)
+                return Success(choiceDtos, "Choices created successfully");
+            //return CreatedAtAction(nameof(GetByQuestionId), new {id=questionId},choiceDtos);
+            return Fail("Failed to create choices");
+            //return Ok();
         }
     }
 }

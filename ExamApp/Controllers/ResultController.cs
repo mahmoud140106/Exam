@@ -9,7 +9,7 @@ namespace ExamApp.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ResultController : ControllerBase
+    public class ResultController : BaseApiController
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -24,22 +24,27 @@ namespace ExamApp.Controllers
         public async Task<IActionResult> GetAll()
         {
             var results = await _unitOfWork.ResultRepo.GetAllAsync();
-            return Ok(_mapper.Map<List<ResultDto>>(results));
+            return Success(_mapper.Map<List<ResultDto>>(results));
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _unitOfWork.ResultRepo.GetByIdAsync(id);
-            if (result == null) return NotFound();
-            return Ok(_mapper.Map<ResultDto>(result));
+            if (result == null)
+                return NotFoundResponse("Result not found");
+
+            return Success(_mapper.Map<ResultDto>(result));
         }
 
         [HttpGet("by-student/{studentId}")]
         public async Task<IActionResult> GetByStudentId(int studentId)
         {
             var results = await _unitOfWork.ResultRepo.GetByStudentIdAsync(studentId);
-            return Ok(_mapper.Map<List<ResultDto>>(results));
+            if (results == null || results.Count == 0)
+                return NotFoundResponse("No results found for this student");
+
+            return Success(_mapper.Map<List<ResultDto>>(results));
         }
 
         [HttpPost]
@@ -48,30 +53,35 @@ namespace ExamApp.Controllers
             var result = _mapper.Map<Result>(dto);
             await _unitOfWork.ResultRepo.CreateAsync(result);
             await _unitOfWork.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, _mapper.Map<ResultDto>(result));
+
+            return Success(_mapper.Map<ResultDto>(result), "Result created successfully");
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, UpdateResultDto dto)
         {
             var existing = await _unitOfWork.ResultRepo.GetByIdAsync(id);
-            if (existing == null) return NotFound();
+            if (existing == null)
+                return NotFoundResponse("Result not found");
 
             _mapper.Map(dto, existing);
-            await _unitOfWork.ResultRepo.UpdateAsync(existing);
-            await _unitOfWork.SaveChangesAsync();
+            var updated = await _unitOfWork.ResultRepo.UpdateAsync(existing);
+            if (!updated)
+                return Fail("Failed to update result");
 
-            return NoContent();
+            await _unitOfWork.SaveChangesAsync();
+            return Success("Result updated successfully");
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var success = await _unitOfWork.ResultRepo.DeleteAsync(id);
-            if (!success) return NotFound();
+            var deleted = await _unitOfWork.ResultRepo.DeleteAsync(id);
+            if (!deleted)
+                return NotFoundResponse("Result not found");
 
             await _unitOfWork.SaveChangesAsync();
-            return NoContent();
+            return Success("Result deleted successfully");
         }
     }
 }
