@@ -89,9 +89,9 @@ namespace ExamApp
             // Middleware
             app.UseCors(corsPolicyName);
 
-            if (app.Environment.IsDevelopment())
-            {
-                //app.MapOpenApi();
+            //if (app.Environment.IsDevelopment())
+            //{
+                //app.MapOpenApi();   
                 //app.UseSwaggerUI(op => op.SwaggerEndpoint("/openapi/v1.json", "v1"));
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
@@ -101,7 +101,7 @@ namespace ExamApp
                 });
 
 
-            }
+            //}
 
             app.UseHttpsRedirection();
             app.UseAuthentication();
