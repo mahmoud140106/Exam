@@ -27,7 +27,8 @@ namespace ExamApp.Middleware
                 context.Response.ContentType = "application/json";
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
-                var response = ApiResponse<string>.Fail("Internal Server Error");
+                //var response = ApiResponse<string>.Fail("Internal Server Error");
+                var response = ApiResponse<string>.Fail(ex.ToString());
                 var json = JsonSerializer.Serialize(response);
 
                 await context.Response.WriteAsync(json);
