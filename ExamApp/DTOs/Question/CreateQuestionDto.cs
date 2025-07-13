@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using ExamApp.DTOs.Choice;
 
 namespace ExamApp.DTOs.Question
 {
@@ -9,5 +10,7 @@ namespace ExamApp.DTOs.Question
 
         [Required]
         public int ExamId { get; set; }
+
+        public List<CreateChoiceDto>? ChoiceDtos { get; set; }
     }
 }

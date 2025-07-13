@@ -34,6 +34,10 @@ namespace ExamApp.Helpers
             CreateMap<Result, ResultDto>();
             CreateMap<CreateResultDto, Result>();
             CreateMap<UpdateResultDto, Result>();
+
+
+
+            CreateMap<Question, EditQuestionDto>().ReverseMap();
         }
     }
 }
