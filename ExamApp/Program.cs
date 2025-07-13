@@ -83,7 +83,8 @@ namespace ExamApp
             });
 
             var app = builder.Build();
-            //DbSeeder.Seed(app);
+            
+            DbSeeder.Seed(app);
             app.UseMiddleware<ExceptionMiddleware>();
 
             // Middleware

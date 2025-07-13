@@ -53,7 +53,7 @@ namespace ExamApp.Controllers
         //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(CreateQuestionDto dto)
         {
-            var choiceDtos = dto.ChoiceDtos;
+            var choiceDtos = dto.Choices;
             if (dto == null) return BadRequest("Invalid Question");
             if (choiceDtos == null || choiceDtos.Count <2) return BadRequest("Question must have at least 2 choices");
 

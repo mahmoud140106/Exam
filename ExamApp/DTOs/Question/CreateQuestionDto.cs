@@ -11,6 +11,6 @@ namespace ExamApp.DTOs.Question
         [Required]
         public int ExamId { get; set; }
 
-        public List<CreateChoiceDto>? ChoiceDtos { get; set; }
+        public List<CreateChoiceDto>? Choices { get; set; }
     }
 }
