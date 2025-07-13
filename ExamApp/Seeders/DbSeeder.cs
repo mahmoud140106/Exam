@@ -106,7 +106,7 @@ namespace ExamApp.Data
                 var answer2 = new Answer
                 {
                     QuestionId = question2.Id,
-                    ChoiceId = choices2.First(c => !c.IsCorrect).Id, // intentionally wrong
+                    ChoiceId = choices2.First(c => !c.IsCorrect).Id,
                     ResultId = result.Id
                 };
 

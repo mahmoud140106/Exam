@@ -50,7 +50,8 @@ namespace ExamApp.Controllers
                 return UnauthorizedResponse("Invalid credentials.");
 
             var token = JwtHelper.GenerateToken(user, _config);
-            return Success(new { token }, "Login successful.");
+            var role = user.Role;
+            return Success(new { token, role }, "Login successful.");
         }
     }
 }
