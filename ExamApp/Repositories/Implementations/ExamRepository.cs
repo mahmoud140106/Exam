@@ -26,7 +26,7 @@ namespace ExamApp.Repositories.Implementations
         public Task<Exam> CreateAsync(Exam exam)
         {
             _context.Exams.Add(exam);
-            return Task.FromResult(exam); 
+            return Task.FromResult(exam);
         }
 
         public Task<bool> UpdateAsync(Exam exam)
@@ -41,6 +41,36 @@ namespace ExamApp.Repositories.Implementations
             if (exam == null) return false;
             _context.Exams.Remove(exam);
             return true;
+        }
+
+        public async Task<List<Exam>> SearchAsync(string? name, string? sortBy, bool isDesc, int page, int pageSize)
+        {
+            var query = _context.Exams.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                query = query.Where(e => e.Title.ToLower().Contains(name.ToLower()));
+            }
+
+            query = sortBy switch
+            {
+                "title" => isDesc ? query.OrderByDescending(e => e.Title) : query.OrderBy(e => e.Title),
+                "createdAt" => isDesc ? query.OrderByDescending(e => e.CreatedAt) : query.OrderBy(e => e.CreatedAt),
+                _ => query.OrderBy(e => e.Id)
+            };
+
+            query = query.Skip((page - 1) * pageSize).Take(pageSize);
+
+            return await query.ToListAsync();
+        }
+
+        public async Task<int> CountAsync(string? name)
+        {
+            var query = _context.Exams.AsQueryable();
+            if (!string.IsNullOrWhiteSpace(name))
+                query = query.Where(e => e.Title.ToLower().Contains(name.ToLower()));
+
+            return await query.CountAsync();
         }
     }
 }

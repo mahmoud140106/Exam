@@ -36,6 +36,31 @@ namespace ExamApp.Controllers
 
             return Success(_mapper.Map<ExamDto>(exam));
         }
+        [HttpGet("search")]
+        public async Task<IActionResult> Search(
+    [FromQuery] string? name,
+    [FromQuery] string? sortBy = "id",
+    [FromQuery] bool isDesc = false,
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 10)
+        {
+            if (page <= 0 || pageSize <= 0)
+                return BadRequest("Invalid pagination values.");
+
+            var data = await _unitOfWork.ExamRepo.SearchAsync(name, sortBy, isDesc, page, pageSize);
+            var totalCount = await _unitOfWork.ExamRepo.CountAsync(name);
+
+            var result = new
+            {
+                totalCount,
+                page,
+                pageSize,
+                data = _mapper.Map<List<ExamDto>>(data)
+            };
+
+            return Success(result);
+        }
+
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
