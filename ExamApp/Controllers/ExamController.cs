@@ -38,11 +38,11 @@ namespace ExamApp.Controllers
         }
         [HttpGet("search")]
         public async Task<IActionResult> Search(
-    [FromQuery] string? name,
-    [FromQuery] string? sortBy = "id",
-    [FromQuery] bool isDesc = false,
-    [FromQuery] int page = 1,
-    [FromQuery] int pageSize = 10)
+            [FromQuery] string? name,
+            [FromQuery] string? sortBy = "id",
+            [FromQuery] bool isDesc = false,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
         {
             if (page <= 0 || pageSize <= 0)
                 return BadRequest("Invalid pagination values.");
