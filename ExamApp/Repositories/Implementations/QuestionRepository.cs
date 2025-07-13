@@ -49,5 +49,12 @@ namespace ExamApp.Repositories.Implementations
                 .Where(q => q.ExamId == examId)
                 .ToListAsync();
         }
+
+        public async Task<Question> GetByIdWithChoicesAsync(int id)
+        {
+            return await _context.Questions
+                        .Include(q => q.Choices)
+                        .FirstOrDefaultAsync(q => q.Id == id);        
+        }
     }
 }
