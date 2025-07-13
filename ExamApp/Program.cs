@@ -38,7 +38,9 @@ namespace ExamApp
                 options
                         //.UseLazyLoadingProxies()
                        .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+            Console.WriteLine("********************************************************");
+            Console.WriteLine(builder.Configuration.GetConnectionString("DefaultConnection"));
+            Console.WriteLine("********************************************************");
             // Authentication (JWT)
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
