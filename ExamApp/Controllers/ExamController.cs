@@ -21,33 +21,18 @@ namespace ExamApp.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var exams = await _unitOfWork.ExamRepo.GetAllAsync();
-            return Success(_mapper.Map<List<ExamDto>>(exams));
-        }
+        public async Task<IActionResult> GetAll(
+    [FromQuery] string? name,
+    [FromQuery] string? sortBy = "id",
+    [FromQuery] bool isDesc = false,
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 10)
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
-        {
-            var exam = await _unitOfWork.ExamRepo.GetByIdAsync(id);
-            if (exam == null)
-                return NotFoundResponse("Exam not found");
-
-            return Success(_mapper.Map<ExamDto>(exam));
-        }
-        [HttpGet("search")]
-        public async Task<IActionResult> Search(
-            [FromQuery] string? name,
-            [FromQuery] string? sortBy = "id",
-            [FromQuery] bool isDesc = false,
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10)
         {
             if (page <= 0 || pageSize <= 0)
                 return BadRequest("Invalid pagination values.");
 
-            var data = await _unitOfWork.ExamRepo.SearchAsync(name, sortBy, isDesc, page, pageSize);
+            var data = await _unitOfWork.ExamRepo.GetAll(name, sortBy, isDesc, page, pageSize);
             var totalCount = await _unitOfWork.ExamRepo.CountAsync(name);
 
             var result = new
@@ -61,6 +46,16 @@ namespace ExamApp.Controllers
             return Success(result);
         }
 
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var exam = await _unitOfWork.ExamRepo.GetByIdAsync(id);
+            if (exam == null)
+                return NotFoundResponse("Exam not found");
+
+            return Success(_mapper.Map<ExamDto>(exam));
+        }
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
