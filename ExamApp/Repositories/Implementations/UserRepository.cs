@@ -78,5 +78,40 @@ namespace ExamApp.Repositories.Implementations
             _context.Users.Update(user);
         }
 
+
+        public async Task<List<User>> GetAll(string? name, string sortBy, bool isDesc, int page, int pageSize, bool? isDeleted)
+        {
+            var query = _context.Users.Where(u => u.Role != "Admin").AsQueryable();
+
+            if (!string.IsNullOrEmpty(name))
+                query = query.Where(u => u.Username.Contains(name));
+
+            if (isDeleted != null)
+                query = query.Where(u => u.IsDeleted == isDeleted.Value);
+
+            // Sorting
+            query = sortBy.ToLower() switch
+            {
+                "username" => isDesc ? query.OrderByDescending(u => u.Username) : query.OrderBy(u => u.Username),
+                "email" => isDesc ? query.OrderByDescending(u => u.Email) : query.OrderBy(u => u.Email),
+                _ => isDesc ? query.OrderByDescending(u => u.Id) : query.OrderBy(u => u.Id)
+            };
+
+            return await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+        }
+
+        public async Task<int> CountAsync(string? name, bool? isDeleted)
+        {
+            var query = _context.Users.AsQueryable();
+
+            if (!string.IsNullOrEmpty(name))
+                query = query.Where(u => u.Username.Contains(name));
+
+            if (isDeleted != null)
+                query = query.Where(u => u.IsDeleted == isDeleted.Value);
+
+            return await query.CountAsync();
+        }
+
     }
 }

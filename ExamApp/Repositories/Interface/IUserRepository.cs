@@ -13,5 +13,9 @@ namespace ExamApp.Repositories.Interface
         Task<bool> HasRelatedResultsAsync(int userId);
         void Update(User user);
         void Delete(User user);
+
+        Task<List<User>> GetAll(string? name, string sortBy, bool isDesc, int page, int pageSize, bool? isDeleted);
+        Task<int> CountAsync(string? name, bool? isDeleted);
+
     }
 }

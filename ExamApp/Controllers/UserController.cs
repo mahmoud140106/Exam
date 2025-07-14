@@ -56,13 +56,13 @@ namespace ExamApp.Controllers
 
 
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] string? search, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
-        {
-            var (users, total) = await _unitOfWork.UserRepo.GetPagedFilteredUsersAsync(search, page, pageSize);
-            var response = _mapper.Map<List<UserDto>>(users);
-            return Success(new { data = response, total }, "Users fetched successfully.");
-        }
+        //[HttpGet]
+        //public async Task<IActionResult> GetAll([FromQuery] string? search, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        //{
+        //    var (users, total) = await _unitOfWork.UserRepo.GetPagedFilteredUsersAsync(search, page, pageSize);
+        //    var response = _mapper.Map<List<UserDto>>(users);
+        //    return Success(new { data = response, total }, "Users fetched successfully.");
+        //}
 
 
         [HttpPost]
@@ -110,14 +110,39 @@ namespace ExamApp.Controllers
             var user = await _unitOfWork.UserRepo.GetByIdAsync(id);
             if (user == null) return NotFoundResponse();
 
-            if (await _unitOfWork.UserRepo.HasRelatedResultsAsync(id))
-                return Fail("Cannot delete student with existing results.");
+            //if (await _unitOfWork.UserRepo.HasRelatedResultsAsync(id))
+            //    return Fail("Cannot delete student with existing results.");
 
             _unitOfWork.UserRepo.Delete(user);
             await _unitOfWork.SaveChangesAsync();
 
             return Success<object?>(null, "Student deleted successfully.");
 
+        }
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll(
+        [FromQuery] string? name,
+        [FromQuery] string? sortBy = "id",
+        [FromQuery] bool isDesc = false,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] bool? isDeleted = null)
+        {
+            var users = await _unitOfWork.UserRepo.GetAll(name, sortBy, isDesc, page, pageSize, isDeleted);
+            var totalCount = await _unitOfWork.UserRepo.CountAsync(name, isDeleted);
+
+            var result = new
+            {
+                totalCount,
+                page,
+                pageSize,
+                data = _mapper.Map<List<UserDto>>(users)
+            };
+
+            return Success(result);
         }
 
     }
