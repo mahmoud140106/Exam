@@ -17,14 +17,25 @@ namespace ExamApp.Repositories.Implementations
             return await _context.Exams.ToListAsync();
         }
 
-        public async Task<List<Exam>> GetAll(string? name, string? sortBy, bool isDesc, int page, int pageSize)
+        public async Task<List<Exam>> GetAll(
+     string? name,
+     string? sortBy,
+     bool isDesc,
+     int page,
+     int pageSize,
+     bool isActive)
         {
-            var now = DateTime.Now;
+            var now = DateTime.UtcNow;
             var query = _context.Exams.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(name))
             {
                 query = query.Where(e => e.Title.ToLower().Contains(name.ToLower()));
+            }
+
+            if (isActive)
+            {
+                query = query.Where(e => e.StartTime <= now && e.EndTime >= now);
             }
 
             query = query.Select(e => new Exam
@@ -36,7 +47,7 @@ namespace ExamApp.Repositories.Implementations
                 EndTime = e.EndTime,
                 CreatedBy = e.CreatedBy,
                 CreatedAt = e.CreatedAt,
-                IsActive = e.StartTime <= now && e.EndTime >= now,
+                IsActive = e.StartTime <= now && e.EndTime >= now
             });
 
             query = sortBy switch
@@ -51,15 +62,25 @@ namespace ExamApp.Repositories.Implementations
             return await query.ToListAsync();
         }
 
-        public async Task<int> CountAsync(string? name)
+
+        public async Task<int> CountAsync(string? name, bool isActive)
         {
+            var now = DateTime.UtcNow;
             var query = _context.Exams.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(name))
+            {
                 query = query.Where(e => e.Title.ToLower().Contains(name.ToLower()));
+            }
+
+            if (isActive)
+            {
+                query = query.Where(e => e.StartTime <= now && e.EndTime >= now);
+            }
 
             return await query.CountAsync();
         }
+
 
 
         public async Task<Exam?> GetByIdAsync(int id)

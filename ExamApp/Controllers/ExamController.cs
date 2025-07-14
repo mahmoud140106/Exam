@@ -26,25 +26,26 @@ namespace ExamApp.Controllers
     [FromQuery] string? sortBy = "id",
     [FromQuery] bool isDesc = false,
     [FromQuery] int page = 1,
-    [FromQuery] int pageSize = 10)
-
+    [FromQuery] int pageSize = 10,
+    [FromQuery] bool isActive = false)
         {
             if (page <= 0 || pageSize <= 0)
                 return BadRequest("Invalid pagination values.");
 
-            var data = await _unitOfWork.ExamRepo.GetAll(name, sortBy, isDesc, page, pageSize);
-            var totalCount = await _unitOfWork.ExamRepo.CountAsync(name);
+            var data = await _unitOfWork.ExamRepo.GetAll(name, sortBy, isDesc, page, pageSize, isActive);
+            var totalCount = await _unitOfWork.ExamRepo.CountAsync(name, isActive);
 
             var result = new
             {
                 totalCount,
                 page,
                 pageSize,
-                data = _mapper.Map<List<ExamDto>>(data)
+                data
             };
 
             return Success(result);
         }
+
 
 
         [HttpGet("{id}")]
