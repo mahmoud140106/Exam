@@ -9,5 +9,9 @@ namespace ExamApp.Repositories.Interface
         Task<bool> IsEmailExistsAsync(string email);
         Task<bool> IsUsernameExistsAsync(string username);
         Task<User> RegisterAsync(User user);
+        Task<(List<User> users, int totalCount)> GetPagedFilteredUsersAsync(string? search, int page, int pageSize);
+        Task<bool> HasRelatedResultsAsync(int userId);
+        void Update(User user);
+        void Delete(User user);
     }
 }
