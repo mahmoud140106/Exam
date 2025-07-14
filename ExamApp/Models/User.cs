@@ -30,4 +30,6 @@ public partial class User
 
     [InverseProperty("Student")]
     public virtual ICollection<Result> Results { get; set; } = new List<Result>();
+
+    public bool IsDeleted { get; set; } = false;
 }

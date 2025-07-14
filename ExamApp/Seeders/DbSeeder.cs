@@ -10,108 +10,110 @@ namespace ExamApp.Data
             using var scope = app.Services.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-            //context.Database.EnsureDeleted();
-            //context.Database.Migrate();
-
             if (!context.Users.Any())
             {
-                var admin = new User
+                var users = new List<User>
                 {
-                    Username = "admin",
-                    Email = "admin@exam.com",
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123"),
-                    Role = "Admin"
+                    new User { Username = "admin", Email = "admin@exam.com", PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123"), Role = "Admin" },
+                    new User { Username = "mahmoud", Email = "mahmoud@student.com", PasswordHash = BCrypt.Net.BCrypt.HashPassword("123456789@M"), Role = "Student" },
+                    new User { Username = "ahmed", Email = "ahmed@student.com", PasswordHash = BCrypt.Net.BCrypt.HashPassword("12345678"), Role = "Student" },
+                    new User { Username = "sara", Email = "sara@student.com", PasswordHash = BCrypt.Net.BCrypt.HashPassword("sara@123"), Role = "Student" },
+                    new User { Username = "noor", Email = "noor@student.com", PasswordHash = BCrypt.Net.BCrypt.HashPassword("noor@123"), Role = "Student" }
                 };
 
-                var student = new User
-                {
-                    Username = "mahmoud",
-                    Email = "mahmoud@student.com",
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("123456789@M"),
-                    Role = "Student"
-                };
-
-                context.Users.AddRange(admin, student);
+                context.Users.AddRange(users);
                 context.SaveChanges();
 
-                // Create Exam
-                var exam = new Exam
-                {
-                    Title = "C# Fundamentals Exam",
-                    Description = "A test on basic concepts of C# language.",
-                    CreatedAt = DateTime.Now.AddDays(-3),
-                    StartTime = DateTime.Today.AddHours(10),
-                    EndTime = DateTime.Today.AddHours(12),
-                    CreatedBy = admin.Id,
-                    IsActive = true
-                };
+                var adminId = users.First(u => u.Role == "Admin").Id;
+                var students = users.Where(u => u.Role == "Student").ToList();
 
-                context.Exams.Add(exam);
+                // Create 5 Exams
+                var exams = new List<Exam>();
+                for (int i = 1; i <= 5; i++)
+                {
+                    exams.Add(new Exam
+                    {
+                        Title = $"Exam {i}",
+                        Description = $"This is exam {i} on general programming.",
+                        CreatedAt = DateTime.Now.AddDays(-i),
+                        StartTime = DateTime.Today.AddHours(9 + i),
+                        EndTime = DateTime.Today.AddHours(10 + i),
+                        CreatedBy = adminId,
+                        IsActive = true
+                    });
+                }
+                context.Exams.AddRange(exams);
                 context.SaveChanges();
 
-                // Create Questions and Choices
-                var question1 = new Question
+                // Create 2 questions per exam
+                var allQuestions = new List<Question>();
+                var allChoices = new List<Choice>();
+                foreach (var exam in exams)
                 {
-                    Text = "What is the output of Console.WriteLine(2 + \"2\")?",
-                    ExamId = exam.Id
-                };
-                var choices1 = new List<Choice>
-                {
-                    new Choice { Text = "4", IsCorrect = false },
-                    new Choice { Text = "22", IsCorrect = true },
-                    new Choice { Text = "Error", IsCorrect = false },
-                    new Choice { Text = "None of the above", IsCorrect = false }
-                };
-                question1.Choices = choices1;
+                    for (int q = 1; q <= 2; q++)
+                    {
+                        var question = new Question
+                        {
+                            ExamId = exam.Id,
+                            Text = $"Question {q} for Exam {exam.Id}"
+                        };
 
-                var question2 = new Question
-                {
-                    Text = "Which of the following is a value type in C#?",
-                    ExamId = exam.Id
-                };
-                var choices2 = new List<Choice>
-                {
-                    new Choice { Text = "string", IsCorrect = false },
-                    new Choice { Text = "int", IsCorrect = true },
-                    new Choice { Text = "object", IsCorrect = false },
-                    new Choice { Text = "class", IsCorrect = false }
-                };
-                question2.Choices = choices2;
-
-                context.Questions.AddRange(question1, question2);
+                        var choices = new List<Choice>
+                        {
+                            new Choice { Text = "Answer A", IsCorrect = false },
+                            new Choice { Text = "Answer B", IsCorrect = true },
+                            new Choice { Text = "Answer C", IsCorrect = false },
+                            new Choice { Text = "Answer D", IsCorrect = false },
+                        };
+                        question.Choices = choices;
+                        allQuestions.Add(question);
+                        allChoices.AddRange(choices);
+                    }
+                }
+                context.Questions.AddRange(allQuestions);
                 context.SaveChanges();
 
-                // Create Result
-                var result = new Result
+                // Create Results per student for first 3 exams
+                var results = new List<Result>();
+                foreach (var student in students)
                 {
-                    StudentId = student.Id,
-                    ExamId = exam.Id,
-                    AttemptNumber = 1,
-                    Score = 1.0,
-                    Status = "Completed",
-                    StartTime = DateTime.Now.AddMinutes(-20),
-                    EndTime = DateTime.Now,
-                    TakenAt = DateTime.Now
-                };
-
-                context.Results.Add(result);
+                    foreach (var exam in exams.Take(3))
+                    {
+                        results.Add(new Result
+                        {
+                            StudentId = student.Id,
+                            ExamId = exam.Id,
+                            AttemptNumber = 1,
+                            Score = 2.0,
+                            Status = "Completed",
+                            StartTime = DateTime.Now.AddMinutes(-30),
+                            EndTime = DateTime.Now,
+                            TakenAt = DateTime.Now
+                        });
+                    }
+                }
+                context.Results.AddRange(results);
                 context.SaveChanges();
 
-                // Create Answers
-                var answer1 = new Answer
+                // Create Answers per result
+                var answers = new List<Answer>();
+                foreach (var result in results)
                 {
-                    QuestionId = question1.Id,
-                    ChoiceId = choices1.First(c => c.IsCorrect).Id,
-                    ResultId = result.Id
-                };
-                var answer2 = new Answer
-                {
-                    QuestionId = question2.Id,
-                    ChoiceId = choices2.First(c => !c.IsCorrect).Id,
-                    ResultId = result.Id
-                };
+                    var examQuestions = allQuestions.Where(q => q.ExamId == result.ExamId).ToList();
 
-                context.Answers.AddRange(answer1, answer2);
+                    foreach (var question in examQuestions)
+                    {
+                        var correctChoice = question.Choices.FirstOrDefault(c => c.IsCorrect) ?? question.Choices.First();
+                        answers.Add(new Answer
+                        {
+                            ResultId = result.Id,
+                            QuestionId = question.Id,
+                            ChoiceId = correctChoice.Id
+                        });
+                    }
+                }
+
+                context.Answers.AddRange(answers);
                 context.SaveChanges();
             }
         }

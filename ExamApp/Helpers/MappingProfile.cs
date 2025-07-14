@@ -20,6 +20,8 @@ namespace ExamApp.Helpers
 
             CreateMap<UserRegisterDto, User>();
             CreateMap<User, UserResponseDto>();
+            CreateMap<User, UserDto>();
+            CreateMap<UserCreateDto, User>();
 
 
             CreateMap<CreateQuestionDto, Question>();

@@ -27,6 +27,7 @@ namespace ExamApp.Controllers
     [FromQuery] bool isDesc = false,
     [FromQuery] int page = 1,
     [FromQuery] int pageSize = 10)
+
         {
             if (page <= 0 || pageSize <= 0)
                 return BadRequest("Invalid pagination values.");
