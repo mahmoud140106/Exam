@@ -48,6 +48,15 @@ namespace ExamApp.Controllers
 
             return Success(_mapper.Map<List<QuestionDto>>(questions));
         }
+        [HttpGet("by-exam/detailed/{examId}")]
+        public async Task<IActionResult> GetByExamIdWithChoices(int examId)
+        {
+            var questions = await _unitOfWork.QuestionRepo.GetByExamIdWithChoicesAsync(examId);
+            if (questions == null || questions.Count == 0)
+                return NotFoundResponse("No questions found for this exam");
+            var mappedResult = _mapper.Map<List<QuestionWithChoicesDto>>(questions);
+            return Success(mappedResult);
+        }
 
         [HttpPost]
         //[Authorize(Roles = "Admin")]
