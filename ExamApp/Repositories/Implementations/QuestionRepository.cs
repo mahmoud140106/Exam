@@ -22,7 +22,20 @@ namespace ExamApp.Repositories.Implementations
         {
             return await _context.Questions.FindAsync(id);
         }
+        public async Task<List<Question>> GetByExamIdAsync(int examId)
+        {
+            return await _context.Questions
+                .Where(q => q.ExamId == examId)
+                .ToListAsync();
+        }
 
+        public async Task<List<Question>> GetByExamIdWithChoicesAsync(int examId)
+        {
+            return await _context.Questions
+                .Include(q=> q.Choices)
+                .Where(q => q.ExamId == examId)
+                .ToListAsync();
+        }
         public Task<Question> CreateAsync(Question question)
         {
             _context.Questions.Add(question);
@@ -43,12 +56,6 @@ namespace ExamApp.Repositories.Implementations
             return true; 
         }
 
-        public async Task<List<Question>> GetByExamIdAsync(int examId)
-        {
-            return await _context.Questions
-                .Where(q => q.ExamId == examId)
-                .ToListAsync();
-        }
 
         public async Task<Question> GetByIdWithChoicesAsync(int id)
         {

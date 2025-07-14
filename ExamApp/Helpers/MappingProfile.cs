@@ -38,6 +38,8 @@ namespace ExamApp.Helpers
 
 
             CreateMap<Question, EditQuestionDto>().ReverseMap();
+
+            CreateMap<Question, QuestionWithChoicesDto>().ReverseMap();
         }
     }
 }
