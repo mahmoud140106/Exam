@@ -12,11 +12,55 @@ namespace ExamApp.Repositories.Implementations
         {
             _context = context;
         }
-
         public async Task<List<Exam>> GetAllAsync()
         {
             return await _context.Exams.ToListAsync();
         }
+
+        public async Task<List<Exam>> GetAll(string? name, string? sortBy, bool isDesc, int page, int pageSize)
+        {
+            var now = DateTime.Now;
+            var query = _context.Exams.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                query = query.Where(e => e.Title.ToLower().Contains(name.ToLower()));
+            }
+
+            query = query.Select(e => new Exam
+            {
+                Id = e.Id,
+                Title = e.Title,
+                Description = e.Description,
+                StartTime = e.StartTime,
+                EndTime = e.EndTime,
+                CreatedBy = e.CreatedBy,
+                CreatedAt = e.CreatedAt,
+                IsActive = e.StartTime <= now && e.EndTime >= now,
+            });
+
+            query = sortBy switch
+            {
+                "title" => isDesc ? query.OrderByDescending(e => e.Title) : query.OrderBy(e => e.Title),
+                "createdAt" => isDesc ? query.OrderByDescending(e => e.CreatedAt) : query.OrderBy(e => e.CreatedAt),
+                _ => isDesc ? query.OrderByDescending(e => e.Id) : query.OrderBy(e => e.Id),
+            };
+
+            query = query.Skip((page - 1) * pageSize).Take(pageSize);
+
+            return await query.ToListAsync();
+        }
+
+        public async Task<int> CountAsync(string? name)
+        {
+            var query = _context.Exams.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(name))
+                query = query.Where(e => e.Title.ToLower().Contains(name.ToLower()));
+
+            return await query.CountAsync();
+        }
+
 
         public async Task<Exam?> GetByIdAsync(int id)
         {
@@ -41,36 +85,6 @@ namespace ExamApp.Repositories.Implementations
             if (exam == null) return false;
             _context.Exams.Remove(exam);
             return true;
-        }
-
-        public async Task<List<Exam>> SearchAsync(string? name, string? sortBy, bool isDesc, int page, int pageSize)
-        {
-            var query = _context.Exams.AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(name))
-            {
-                query = query.Where(e => e.Title.ToLower().Contains(name.ToLower()));
-            }
-
-            query = sortBy switch
-            {
-                "title" => isDesc ? query.OrderByDescending(e => e.Title) : query.OrderBy(e => e.Title),
-                "createdAt" => isDesc ? query.OrderByDescending(e => e.CreatedAt) : query.OrderBy(e => e.CreatedAt),
-                _ => query.OrderBy(e => e.Id)
-            };
-
-            query = query.Skip((page - 1) * pageSize).Take(pageSize);
-
-            return await query.ToListAsync();
-        }
-
-        public async Task<int> CountAsync(string? name)
-        {
-            var query = _context.Exams.AsQueryable();
-            if (!string.IsNullOrWhiteSpace(name))
-                query = query.Where(e => e.Title.ToLower().Contains(name.ToLower()));
-
-            return await query.CountAsync();
         }
     }
 }
