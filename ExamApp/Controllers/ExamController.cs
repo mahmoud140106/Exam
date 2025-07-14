@@ -21,19 +21,17 @@ namespace ExamApp.Controllers
         }
 
         [HttpGet]
+        [HttpGet]
         public async Task<IActionResult> GetAll(
     [FromQuery] string? name,
     [FromQuery] string? sortBy = "id",
     [FromQuery] bool isDesc = false,
     [FromQuery] int page = 1,
     [FromQuery] int pageSize = 10,
-    [FromQuery] bool isActive = false)
+    [FromQuery] bool? isActive = null)
         {
-            if (page <= 0 || pageSize <= 0)
-                return BadRequest("Invalid pagination values.");
-
             var data = await _unitOfWork.ExamRepo.GetAll(name, sortBy, isDesc, page, pageSize, isActive);
-            var totalCount = await _unitOfWork.ExamRepo.CountAsync(name, isActive);
+            var totalCount = await _unitOfWork.ExamRepo.CountAsync(name, isActive ?? false);
 
             var result = new
             {
@@ -45,6 +43,7 @@ namespace ExamApp.Controllers
 
             return Success(result);
         }
+
 
 
 
@@ -94,6 +93,7 @@ namespace ExamApp.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
+
             var success = await _unitOfWork.ExamRepo.DeleteAsync(id);
             if (!success)
                 return NotFoundResponse("Exam not found or already deleted");

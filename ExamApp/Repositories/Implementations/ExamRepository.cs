@@ -23,7 +23,7 @@ namespace ExamApp.Repositories.Implementations
      bool isDesc,
      int page,
      int pageSize,
-     bool isActive)
+     bool? isActive = null)
         {
             var now = DateTime.UtcNow;
             var query = _context.Exams.AsQueryable();
@@ -33,22 +33,10 @@ namespace ExamApp.Repositories.Implementations
                 query = query.Where(e => e.Title.ToLower().Contains(name.ToLower()));
             }
 
-            if (isActive)
+            if (isActive == true)
             {
                 query = query.Where(e => e.StartTime <= now && e.EndTime >= now);
             }
-
-            query = query.Select(e => new Exam
-            {
-                Id = e.Id,
-                Title = e.Title,
-                Description = e.Description,
-                StartTime = e.StartTime,
-                EndTime = e.EndTime,
-                CreatedBy = e.CreatedBy,
-                CreatedAt = e.CreatedAt,
-                IsActive = e.StartTime <= now && e.EndTime >= now
-            });
 
             query = sortBy switch
             {
@@ -59,7 +47,9 @@ namespace ExamApp.Repositories.Implementations
 
             query = query.Skip((page - 1) * pageSize).Take(pageSize);
 
-            return await query.ToListAsync();
+            var exams = await query.ToListAsync();
+
+            return exams;
         }
 
 
