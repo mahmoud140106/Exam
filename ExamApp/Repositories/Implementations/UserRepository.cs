@@ -13,6 +13,10 @@ namespace ExamApp.Repositories.Implementations
             _context = context;
         }
 
+        public async Task<List<User>> GetAllAsync()
+        {
+            return await _context.Users.Where(u => !u.IsDeleted &&u.Role != "Admin").ToListAsync();
+        }
         public async Task<User?> GetByEmailAsync(string email)
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
@@ -112,6 +116,5 @@ namespace ExamApp.Repositories.Implementations
 
             return await query.CountAsync();
         }
-
     }
 }
