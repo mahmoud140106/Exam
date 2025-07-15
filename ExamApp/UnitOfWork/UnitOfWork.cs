@@ -1,4 +1,5 @@
 ﻿using System;
+using AutoMapper;
 using ExamApp.Models;
 using ExamApp.Repositories.Implementations;
 using ExamApp.Repositories.Interface;
@@ -16,9 +17,10 @@ namespace ExamApp.UnitOfWork
         private IResultRepository _results;
 
 
-        public UnitOfWork(ApplicationDbContext context)
+        public UnitOfWork(ApplicationDbContext context, IMapper _mapper)
         {
             _context = context;
+            Mapper = _mapper;
         }
 
         public IExamRepository ExamRepo =>
@@ -33,10 +35,12 @@ namespace ExamApp.UnitOfWork
             _users ??= new UserRepository(_context);
 
         public IResultRepository ResultRepo =>
-            _results ??= new ResultRepository(_context);
+            _results ??= new ResultRepository(_context,Mapper);
 
         public IChoiceRepository ChoiceRepo=>
             _choices ??= new ChoiceRepository(_context);
+
+        public IMapper Mapper { get; }
 
         public Task<int> SaveChangesAsync() => _context.SaveChangesAsync();
 

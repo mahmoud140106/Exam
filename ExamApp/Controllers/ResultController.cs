@@ -46,6 +46,16 @@ namespace ExamApp.Controllers
 
             return Success(_mapper.Map<List<ResultDto>>(results));
         }
+        [HttpGet("by-student/detailed/{studentId}")]
+        public async Task<IActionResult> GetByStudentIdWithDetails(int studentId)
+        {
+            if (studentId == 0) return NotFoundResponse();
+            var student = await _unitOfWork.UserRepo.GetByIdAsync(studentId);
+            if(student == null) return NotFoundResponse();
+
+            var results = await _unitOfWork.ResultRepo.GetByStudentIdWithDetailsAsync(studentId);
+            return Success(results);
+        }
 
         [HttpPost]
         public async Task<IActionResult> Create(CreateResultDto dto)
