@@ -84,8 +84,6 @@ namespace ExamApp.Controllers
             await _unitOfWork.SaveChangesAsync();
             return Success<object>(null, "Answer deleted successfully");
         }
-
-
         [HttpPost("submit")]
         public async Task<IActionResult> SubmitAnswers([FromBody] List<CreateAnswerDto> dtos)
         {
@@ -96,6 +94,7 @@ namespace ExamApp.Controllers
             if (resultId == 0)
                 return Fail("Invalid result ID");
 
+            // حفظ الإجابات
             var answers = _mapper.Map<List<Answer>>(dtos);
             foreach (var answer in answers)
             {
@@ -104,6 +103,7 @@ namespace ExamApp.Controllers
 
             await _unitOfWork.SaveChangesAsync();
 
+            // حساب السكور
             var result = await _unitOfWork.ResultRepo.GetByIdWithAnswersAndChoicesAsync(resultId);
             if (result == null)
                 return NotFoundResponse("Result not found");
@@ -129,6 +129,5 @@ namespace ExamApp.Controllers
                 totalAnswers
             });
         }
-
     }
 }

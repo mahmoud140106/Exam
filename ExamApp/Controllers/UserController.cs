@@ -51,7 +51,8 @@ namespace ExamApp.Controllers
 
             var token = JwtHelper.GenerateToken(user, _config);
             var role = user.Role;
-            return Success(new { token, role }, "Login successful.");
+            var id = user.Id;
+            return Success(new { token, id, role }, "Login successful.");
         }
 
 
@@ -143,6 +144,17 @@ namespace ExamApp.Controllers
             };
 
             return Success(result);
+        }
+
+
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            if (id == 0) return NotFound();
+            var student = await _unitOfWork.UserRepo.GetByIdAsync(id);
+            if (student == null) return NotFound();
+            return Success(student);
         }
 
     }

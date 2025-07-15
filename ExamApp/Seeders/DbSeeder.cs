@@ -15,8 +15,8 @@ namespace ExamApp.Data
                 var users = new List<User>
                 {
                     new User { Username = "admin", Email = "admin@exam.com", PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123"), Role = "Admin" },
-                    new User { Username = "kareem", Email = "mahmoud@student.com", PasswordHash = BCrypt.Net.BCrypt.HashPassword("123456789@M"), Role = "Student" },
-                    new User { Username = "mahmoud", Email = "mahmoud@student.com", PasswordHash = BCrypt.Net.BCrypt.HashPassword("123456789@M"), Role = "Student" },
+                    new User { Username = "kareem", Email = "kareem@student.com", PasswordHash = BCrypt.Net.BCrypt.HashPassword("12345@M"), Role = "Student" },
+                    new User { Username = "mahmoud", Email = "mahmoud@student.com", PasswordHash = BCrypt.Net.BCrypt.HashPassword("12345@M"), Role = "Student" },
                     new User { Username = "ahmed", Email = "ahmed@student.com", PasswordHash = BCrypt.Net.BCrypt.HashPassword("12345678"), Role = "Student" },
                     new User { Username = "sara", Email = "sara@student.com", PasswordHash = BCrypt.Net.BCrypt.HashPassword("sara@123"), Role = "Student" },
                     new User { Username = "noor", Email = "noor@student.com", PasswordHash = BCrypt.Net.BCrypt.HashPassword("noor@123"), Role = "Student" }

@@ -45,15 +45,8 @@ namespace ExamApp.Repositories.Implementations
 
         public async Task<int> DeleteAllByQuestionIdAsync(int questionId)
         {
-            var choicesToDelete = Db.Choices.Where(c => c.QuestionId == questionId && c.Answers.Count == 0);
-            int noRowsDeleted = 0;
-
-            if (choicesToDelete.Any())
-            {
-                Db.Choices.RemoveRange(choicesToDelete);
-                noRowsDeleted = await Db.SaveChangesAsync();
-            }
-
+            var noRowsDeleted = await Db.Choices.Where(c => c.QuestionId == questionId && c.Answers.Count == 0)
+                      .ExecuteDeleteAsync();
             return noRowsDeleted;
         }
 
