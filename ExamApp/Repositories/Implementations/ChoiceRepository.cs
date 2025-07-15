@@ -43,11 +43,22 @@ namespace ExamApp.Repositories.Implementations
             return true;
         }
 
+        //public async Task<int> DeleteAllByQuestionIdAsync(int questionId)
+        //{
+        //    var noRowsDeleted = await Db.Choices.Where(c => c.QuestionId == questionId && c.Answers.Count == 0)
+        //              .ExecuteDeleteAsync();
+        //    return noRowsDeleted;
+        //}
         public async Task<int> DeleteAllByQuestionIdAsync(int questionId)
         {
-            var noRowsDeleted = await Db.Choices.Where(c => c.QuestionId == questionId && c.Answers.Count == 0)
-                      .ExecuteDeleteAsync();
-            return noRowsDeleted;
+            var choicesToDelete = await Db.Choices
+                .Where(c => c.QuestionId == questionId && c.Answers.Count == 0)
+                .ToListAsync();  
+
+            Db.Choices.RemoveRange(choicesToDelete);
+            await Db.SaveChangesAsync();
+
+            return choicesToDelete.Count;
         }
 
 
