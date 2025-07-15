@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace ExamApp
-{
+{  
     public class Program
     {
         public static void Main(string[] args)
@@ -62,7 +62,7 @@ namespace ExamApp
             builder.Services.AddAuthorization();
 
             // AutoMapper
-            builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
+            builder.Services.AddAutoMapper(typeof(MappingProfile)); // Update this line
 
             // Repositories & Services
             //builder.Services.AddScoped<AuthService>();
@@ -72,6 +72,7 @@ namespace ExamApp
 
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IUnitOfWork,UnitOfWork.UnitOfWork>();
+
 
             // CORS
             builder.Services.AddCors(options =>
@@ -85,16 +86,16 @@ namespace ExamApp
             });
 
             var app = builder.Build();
-            
-            DbSeeder.Seed(app);
+
+            //DbSeeder.Seed(app);    
             app.UseMiddleware<ExceptionMiddleware>();
 
             // Middleware
             app.UseCors(corsPolicyName);
 
-            if (app.Environment.IsDevelopment())
-            {
-                //app.MapOpenApi();
+            //if (app.Environment.IsDevelopment())
+            //{
+                //app.MapOpenApi();   
                 //app.UseSwaggerUI(op => op.SwaggerEndpoint("/openapi/v1.json", "v1"));
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
@@ -104,13 +105,15 @@ namespace ExamApp
                 });
 
 
-            }
+            //}
 
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllers();
+            var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+            app.Urls.Add($"http://*:{port}");
 
             app.Run();
         }
