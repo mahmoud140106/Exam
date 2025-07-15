@@ -71,6 +71,13 @@ namespace ExamApp.Repositories.Implementations
                 .ToListAsync();
         }
 
+        public async Task<Result?> GetByIdWithAnswersAndChoicesAsync(int resultId)
+        {
+            return await _context.Results
+                .Include(r => r.Answers)
+                    .ThenInclude(a => a.Choice)
+                .FirstOrDefaultAsync(r => r.Id == resultId);
+        }
         public async Task<List<StudentResultDTO>> GetByStudentIdWithDetailsAsync(int studentId)
         {
             var results = await _context.Results.Where(r=> r.StudentId == studentId).ProjectTo<StudentResultDTO>(Mapper.ConfigurationProvider).ToListAsync();

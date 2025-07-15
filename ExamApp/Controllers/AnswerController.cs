@@ -84,5 +84,51 @@ namespace ExamApp.Controllers
             await _unitOfWork.SaveChangesAsync();
             return Success<object>(null, "Answer deleted successfully");
         }
+
+
+        [HttpPost("submit")]
+        public async Task<IActionResult> SubmitAnswers([FromBody] List<CreateAnswerDto> dtos)
+        {
+            if (dtos == null || !dtos.Any())
+                return Fail("No answers provided");
+
+            int resultId = dtos.First().ResultId ?? 0;
+            if (resultId == 0)
+                return Fail("Invalid result ID");
+
+            var answers = _mapper.Map<List<Answer>>(dtos);
+            foreach (var answer in answers)
+            {
+                await _unitOfWork.AnswerRepo.CreateAsync(answer);
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+
+            var result = await _unitOfWork.ResultRepo.GetByIdWithAnswersAndChoicesAsync(resultId);
+            if (result == null)
+                return NotFoundResponse("Result not found");
+
+            int totalAnswers = result.Answers.Count;
+            int correctAnswers = result.Answers.Count(a => a.Choice != null && a.Choice.IsCorrect);
+
+            double score = totalAnswers == 0 ? 0 : Math.Round((double)correctAnswers / totalAnswers * 100, 2);
+            result.Score = score;
+            result.Status = "Completed";
+            result.EndTime = DateTime.UtcNow;
+            result.TakenAt = DateTime.UtcNow;
+
+            await _unitOfWork.ResultRepo.UpdateAsync(result);
+            await _unitOfWork.SaveChangesAsync();
+
+            return Success(new
+            {
+                message = "Exam submitted successfully",
+                id = resultId,
+                score = score,
+                correctAnswers,
+                totalAnswers
+            });
+        }
+
     }
 }
