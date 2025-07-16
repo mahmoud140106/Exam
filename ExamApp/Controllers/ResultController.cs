@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using ExamApp.DTOs.Answer;
 using ExamApp.DTOs.Result;
 using ExamApp.Models;
 using ExamApp.UnitOfWork;
@@ -92,6 +93,21 @@ namespace ExamApp.Controllers
 
             await _unitOfWork.SaveChangesAsync();
             return Success("Result deleted successfully");
+        }
+        [HttpGet("page/{id}")]
+        public async Task<IActionResult>GetAnswerWithDetails(int id,[FromQuery] int page=1,[FromQuery] int pageSize=10)
+        {
+            if (id == 0) return BadRequest();
+
+            var result = await _unitOfWork.ResultRepo.GetByIdAsync(id);
+            
+            if (result == null) return NotFoundResponse();
+            if(page<1) page = 1;
+
+            var pageData= _unitOfWork.ResultRepo.GetPage(id, page,pageSize);
+            if (pageData == null || pageData.Count == 0) return NotFoundResponse();
+            //var mapped = _mapper.Map<List<AnswerWithQuestions>>(pageData);
+            return Success(pageData);
         }
     }
 }

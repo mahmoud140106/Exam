@@ -35,7 +35,7 @@ namespace ExamApp.Repositories.Implementations
 
             if (isActive == true)
             {
-                query = query.Where(e => e.StartTime <= now && e.EndTime >= now);
+                query = query.Where(e => e.IsActive==true);
             }
 
             query = sortBy switch

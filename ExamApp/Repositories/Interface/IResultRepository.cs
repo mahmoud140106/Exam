@@ -10,5 +10,6 @@ namespace ExamApp.Repositories.Interface
 
         Task<Result?> GetByIdWithAnswersAndChoicesAsync(int resultId);
         Task<List<StudentResultDTO>> GetByStudentIdWithDetailsAsync(int studentId);
+        List<Answer> GetPage(int resultId, int page = 1, int pageSize = 10);
     }
 }

@@ -31,7 +31,7 @@ namespace ExamApp.Helpers
             CreateMap<CreateChoiceDto, Choice>();
 
             CreateMap<CreateAnswerDto, Answer>();
-            CreateMap<Answer, AnswerDto>();
+            CreateMap<Answer, AnswerDto>().ReverseMap();
 
             CreateMap<Result, ResultDto>();
             CreateMap<CreateResultDto, Result>();
@@ -46,6 +46,8 @@ namespace ExamApp.Helpers
             CreateMap<Result, StudentResultDTO>()
                 //.ForMember(dest => dest., opt => opt.MapFrom(src => src.Customer.Name))
                 ;
+
+            CreateMap<Answer,AnswerWithQuestions>().ReverseMap();
 
         }
     }

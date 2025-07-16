@@ -1,5 +1,8 @@
-﻿using AutoMapper;
+﻿using System.Linq.Expressions;
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using ExamApp.DTOs.Answer;
+using ExamApp.DTOs.Question;
 using ExamApp.DTOs.Result;
 using ExamApp.Models;
 using ExamApp.Repositories.Interface;
@@ -82,6 +85,21 @@ namespace ExamApp.Repositories.Implementations
         {
             var results = await _context.Results.Where(r => r.StudentId == studentId).ProjectTo<StudentResultDTO>(Mapper.ConfigurationProvider).ToListAsync();
             return results;
+        }
+
+
+        public List<Answer> GetPage(int resultId,int page = 1, int pageSize = 10)
+        {
+            Console.WriteLine("********************************************************************\nBegin");
+            var answer = _context.Answers.AsNoTracking().Where(a=> a.ResultId == resultId);
+
+            answer= answer.Include(a => a.Question).ThenInclude(q => q.Choices);
+            //int courseCount = answer.Count();
+
+            answer = answer.Skip((page - 1) * pageSize)
+                            .Take(pageSize);
+
+            return answer.ToList();
         }
     }
 }
